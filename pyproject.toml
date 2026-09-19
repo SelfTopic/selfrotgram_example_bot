@@ -1,0 +1,23 @@
+[project]
+name = "selfrotgram-example-bot"
+version = "0.1.0"
+description = "Показательный бот на selfrotgram: команды, callback, inline, chat_member, БД и зависимости в контексте"
+authors = [
+    {name = "CheStor",email = "selftopic@gmail.com"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "selfrotgram @ git+https://github.com/SelfTopic/selfrotgram.git",
+    "sqlalchemy (>=2.0.54,<3.0.0)",
+    "aiosqlite (>=0.22.1,<0.23.0)",
+    "python-dotenv (>=1.2.3,<2.0.0)"
+]
+
+
+[tool.poetry]
+# Приложение, а не пакет: `poetry install` ставит только зависимости.
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
