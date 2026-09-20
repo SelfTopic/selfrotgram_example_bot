@@ -1,7 +1,7 @@
 from selfrot import InlineKeyboard, button
 from selfrot.types import InlineKeyboardMarkup
 
-from .callbacks import Counter, Menu
+from .callbacks import Counter, Menu, TransferChoice
 
 
 def menu_keyboard() -> InlineKeyboardMarkup:
@@ -24,4 +24,11 @@ def counter_keyboard(value: int, owner: int) -> InlineKeyboardMarkup:
     kb.button("🔄", Counter(action="reset", value=value, owner=owner))
     kb.button("+1", Counter(action="inc", value=value, owner=owner))
     kb.row(button("✖ Закрыть", Counter(action="close", value=value, owner=owner)))
+    return kb.markup()
+
+
+def transfer_keyboard() -> InlineKeyboardMarkup:
+    kb = InlineKeyboard(width=2)
+    kb.button("✅ Перевести", TransferChoice(action="yes"))
+    kb.button("❌ Отмена", TransferChoice(action="no"))
     return kb.markup()

@@ -69,6 +69,23 @@ class UserRepository:
             await self.session.refresh(user)
         return user
 
+    async def try_debit(self, telegram_id: int, amount: int) -> Optional[User]:
+        """
+        Списать, только если хватает: проверка и списание одним UPDATE ... WHERE balance >= amount.
+        None: не хватило (или пользователя нет), ничего не изменилось.
+        """
+        stmt = (
+            update(User)
+            .where(User.telegram_id == telegram_id, User.balance >= amount)
+            .values(balance=User.balance - amount)
+            .returning(User)
+            .execution_options(synchronize_session=False)
+        )
+        user = await self.session.scalar(stmt)
+        if user is not None:
+            await self.session.refresh(user)
+        return user
+
     async def top(self, limit: int) -> Sequence[User]:
         stmt = select(User).order_by(User.balance.desc(), User.id).limit(limit)
         return (await self.session.scalars(stmt)).all()

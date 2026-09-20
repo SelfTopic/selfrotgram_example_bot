@@ -960,24 +960,20 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "selfrotgram"
-version = "0.1.0"
+version = "0.1.1"
 description = "Async Python library for Telegram Bot API: types and methods generated from the spec, filters, routers, webhooks"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "selfrotgram-0.1.1-py3-none-any.whl", hash = "sha256:89bbda786521b89b623b03db114660c82d13fdb08f7c5b8805d5e4cf857dc427"},
+    {file = "selfrotgram-0.1.1.tar.gz", hash = "sha256:da8646c25232088d9951af79d524f63a638df1bec8c655366ed2dcf6b2b3763a"},
+]
 
 [package.dependencies]
 aiohttp = ">=3.12"
 pydantic = ">=2.11"
 typing_extensions = ">=4.14"
-
-[package.source]
-type = "git"
-url = "https://github.com/SelfTopic/selfrotgram.git"
-reference = "HEAD"
-resolved_reference = "0ed11cfdfd08bf7657cd89647d1985068275860e"
 
 [[package]]
 name = "sqlalchemy"
@@ -1259,4 +1255,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "d3b64a75167c26df907578fffb25ae44af7271ee0b44a33e445e4b9b42dae640"
+content-hash = "1f56f23b832e1fd0aa491e9bef96b44540a5e07c328bc3262f541b1d5e4b6af5"

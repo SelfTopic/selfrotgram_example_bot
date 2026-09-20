@@ -1,7 +1,9 @@
 import random
 from html import escape
+from typing import Annotated, Literal
 
-from selfrot import BaseRouter, MessageHandler
+from pydantic import Field
+from selfrot import BaseRouter, CommandArgs, MessageHandler, Rest
 from selfrot.filter import Command
 from selfrot.types import TextMessage
 
@@ -16,57 +18,81 @@ class Ping(MessageHandler[AppContext[TextMessage]]):
         await self.ctx.reply_message("pong 🏓")
 
 
+# Аргументы команды как данные: форму описываем один раз, разбор, типы и проверку
+# делает библиотека. Неверные аргументы бросают CommandArgsError, а подсказку для
+# всех команд сразу отправляет Dispatcher.on_error (см. __main__.py).
+
+
+class EchoArgs(CommandArgs):
+    text: Rest  # весь остаток строки, с пробелами
+
+
 class Echo(MessageHandler[AppContext[TextMessage]]):
     # Фильтр кладём в атрибут: в хендлере им же разбираем аргументы (parse).
-    cmd = Command("echo")
-    query = cmd
-
-    async def handle(self) -> None:
-        rest = self.cmd.parse(self.ctx).rest  # всё после команды одной строкой
-        if not rest:
-            await self.ctx.reply_message("Использование: <code>/echo текст</code>")
-            return
-
-        await self.ctx.reply_message(escape(rest))
-
-
-class Sum(MessageHandler[AppContext[TextMessage]]):
-    # args_count=2: /sum с другим числом аргументов этому хендлеру не подходит.
-    cmd = Command("sum", args_count=2)
+    cmd = Command("echo", EchoArgs)
     query = cmd
 
     async def pre_handle(self) -> None:
-        # Разбор и проверка до handle. Исключение отсюда попадает в on_error.
-        self.a, self.b = (int(arg) for arg in self.cmd.parse(self.ctx).args)
+        self.args = self.cmd.parse(self.ctx)  # EchoArgs; ошибка не дойдёт до handle
 
     async def handle(self) -> None:
-        await self.ctx.reply_message(f"{self.a} + {self.b} = <b>{self.a + self.b}</b>")
-
-    async def on_error(self, exc: Exception) -> None:
-        if isinstance(exc, ValueError):
-            await self.ctx.reply_message("Нужны два целых числа: <code>/sum 2 3</code>")
-            return
-        raise exc  # чужое отдаём выше, в Dispatcher.on_error
+        await self.ctx.reply_message(escape(self.args.text))
 
 
-class SumUsage(MessageHandler[AppContext[TextMessage]]):
-    # Стоит после Sum: сюда доходит /sum с любым другим числом аргументов.
-    query = Command("sum")
+class CalcArgs(CommandArgs):
+    one: int
+    operator: Literal["+", "-", "*", "/"]  # только эти четыре
+    two: int
+
+
+class Calc(MessageHandler[AppContext[TextMessage]]):
+    """/calc 2 + 3"""
+
+    cmd = Command("calc", CalcArgs)
+    query = cmd
+
+    async def pre_handle(self) -> None:
+        self.args = self.cmd.parse(self.ctx)
 
     async def handle(self) -> None:
-        await self.ctx.reply_message("Использование: <code>/sum 2 3</code>")
+        a = self.args  # one и two уже int, operator из Literal
+        result: int | str
+        match a.operator:
+            case "+":
+                result = a.one + a.two
+            case "-":
+                result = a.one - a.two
+            case "*":
+                result = a.one * a.two
+            case "/":
+                result = f"{a.one / a.two:g}" if a.two else "на ноль делить нельзя"
+
+        await self.ctx.reply_message(f"{a.one} {a.operator} {a.two} = <b>{result}</b>")
+
+
+class RollArgs(CommandArgs):
+    # Значение по умолчанию: аргумент можно не писать. Ограничения pydantic работают.
+    sides: Annotated[int, Field(ge=2, le=1000)] = 6
 
 
 class Roll(MessageHandler[AppContext[TextMessage]]):
-    # Фильтры складываются через |; вторая команда без префикса и без учёта регистра.
-    query = Command("roll") | Command("кубик", prefixes="", ignore_case=True)
+    """/roll или /roll 20"""
+
+    cmd = Command("roll", RollArgs)
+    query = cmd
+
+    async def pre_handle(self) -> None:
+        self.args = self.cmd.parse(self.ctx)
 
     async def handle(self) -> None:
-        await self.ctx.reply_message(f"🎲 Выпало: <b>{random.randint(1, 6)}</b>")
+        await self.ctx.reply_message(
+            f"🎲 d{self.args.sides}: <b>{random.randint(1, self.args.sides)}</b>"
+        )
 
 
 class Say(MessageHandler[AppContext[TextMessage]]):
-    # Имя из двух слов и без префикса: «Бот скажи привет».
+    # Имя из двух слов и без префикса: «Бот скажи привет». Без модели аргументов
+    # parse отдаёт сырой разбор (rest, args).
     cmd = Command("бот скажи", prefixes="", ignore_case=True)
     query = cmd
 
@@ -76,7 +102,7 @@ class Say(MessageHandler[AppContext[TextMessage]]):
 
 
 class CommandsRouter(BaseRouter[AppContext]):
-    handlers = (Ping, Echo, Sum, SumUsage, Roll, Say)
+    handlers = (Ping, Echo, Calc, Roll, Say)
 
 
 router = CommandsRouter

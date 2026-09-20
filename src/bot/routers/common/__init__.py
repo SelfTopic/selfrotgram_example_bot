@@ -8,8 +8,10 @@ class CommonRouter(BaseRouter[AppContext]):
     # Новый роутер из этого пакета добавляется сюда одной строкой.
     auto_connect = (
         ".start_router",
+        ".dialogs_router",  # шаги диалога выше общих обработчиков текста
         ".help_router",
         ".commands_router",
+        ".deferred_router",
         ".text_router",
         ".events_router",
         ".callbacks_router",

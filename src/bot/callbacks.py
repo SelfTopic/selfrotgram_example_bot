@@ -18,3 +18,9 @@ class Counter(CallbackPayload, prefix="cnt"):
     action: Literal["inc", "dec", "reset", "close"]
     value: int
     owner: int
+
+
+class TransferChoice(CallbackPayload, prefix="xfer"):
+    """Подтверждение перевода. Данные самого перевода лежат не в кнопке, а в FSM."""
+
+    action: Literal["yes", "no"]

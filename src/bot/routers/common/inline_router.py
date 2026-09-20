@@ -6,6 +6,7 @@ from selfrot.handlers import ChosenInlineResultHandler, InlineQueryHandler
 from selfrot.types import (
     ChosenInlineResult,
     InlineQuery,
+    InlineQueryResult,
     InlineQueryResultArticle,
     InputTextMessageContent,
 )
@@ -30,7 +31,9 @@ class Inline(InlineQueryHandler[AppContext[InlineQuery]]):
     async def handle(self) -> None:
         text = self.ctx.inline_query.query.strip()
 
-        results = [_article("fact", "💡 Случайный факт", self.ctx.facts.random())]
+        results: list[InlineQueryResult] = [
+            _article("fact", "💡 Случайный факт", self.ctx.facts.random())
+        ]
         if text:
             results += [
                 _article("upper", "ВЕРХНИЙ РЕГИСТР", escape(text.upper())),

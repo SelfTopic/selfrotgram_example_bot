@@ -50,6 +50,30 @@ class UserService:
             raise UserError("Сначала отправь /start")
         return user
 
+    async def transfer(
+        self, sender_id: int, receiver_id: int, amount: int
+    ) -> tuple[User, User]:
+        """
+        Перевод монет. Проверки идут до любой записи, а само списание и зачисление в
+        одной транзакции: любое UserError откатит всё (DatabaseMiddleware).
+        """
+        if amount <= 0:
+            raise UserError("Сумма должна быть положительной")
+        if sender_id == receiver_id:
+            raise UserError("Нельзя переводить самому себе")
+        if await self.user_repository.get(receiver_id) is None:
+            raise UserError("Получатель ещё не пользуется ботом")
+
+        sender = await self.user_repository.try_debit(sender_id, amount)
+        if sender is None:
+            raise UserError("Недостаточно монет, получить их можно командой /bonus")
+
+        receiver = await self.user_repository.add_balance(receiver_id, amount)
+        if receiver is None:
+            raise UserError("Получатель ещё не пользуется ботом")
+
+        return sender, receiver
+
     async def top(self, limit: int = 5) -> Sequence[User]:
         return await self.user_repository.top(limit)
 

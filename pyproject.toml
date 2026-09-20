@@ -1,13 +1,13 @@
 [project]
 name = "selfrotgram-example-bot"
 version = "0.1.0"
-description = "Показательный бот на selfrotgram: команды, callback, inline, chat_member, БД и зависимости в контексте"
+description = "Показательный бот на selfrotgram: команды с типизированными аргументами, callback, inline, chat_member, FSM, отложенные вызовы, БД и зависимости в контексте"
 authors = [
     {name = "CheStor",email = "selftopic@gmail.com"}
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "selfrotgram @ git+https://github.com/SelfTopic/selfrotgram.git",
+    "selfrotgram (>=0.1.1,<0.2.0)",
     "sqlalchemy (>=2.0.54,<3.0.0)",
     "aiosqlite (>=0.22.1,<0.23.0)",
     "python-dotenv (>=1.2.3,<2.0.0)"

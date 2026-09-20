@@ -19,7 +19,7 @@ class Greeting(MessageHandler[AppContext[UserMessage]]):
         await self.ctx.reply_message(f"Привет, {name}! 👋")
 
 
-class Calc(MessageHandler[AppContext[TextMessage]]):
+class QuickCalc(MessageHandler[AppContext[TextMessage]]):
     # «2+2», «10 / 4»: регулярка разбирает выражение, match() отдаёт совпадение.
     calc = TextRegexp(r"\s*(-?\d+)\s*([+\-*/])\s*(-?\d+)\s*", full=True)
     query = calc
@@ -36,7 +36,7 @@ class Calc(MessageHandler[AppContext[TextMessage]]):
 
 
 class TextRouter(BaseRouter[AppContext]):
-    handlers = (Greeting, Calc)
+    handlers = (Greeting, QuickCalc)
 
 
 router = TextRouter
